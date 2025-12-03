@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+	<title>CAPTURE scale</title>
+	<style>
+		[v-cloak] {
+			display: none;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div class="container-fluid">
+			<div class="row">
+				<!-- Sidebar -->
+				<div class="col-md-3 bg-light p-4" style="min-height: calc(100vh - 120px); border-right: 1px solid #ddd;">
+					<collapsible-section title="Program characteristics">
+
+						<numericinput v-model.number="intervention.initialFacilities" label="Initial number of facilities"
+							help="Facilities initially providing the intervention"></numericinput>
+						<numericinput v-model="intervention.targetVisits" label="Target annual visits">
+							<small class="text-muted">A total national target can be provided directly, or <a href="#"
+									style="margin-top: -2px" @click="toggleTargetModal">calculate target from population and
+									coverage</a></small>
+						</numericinput>
+						<target :show="showTargetModal" :intervention="intervention" @save="saveTarget" @close="toggleTargetModal">
+						</target>
+						<numericinput v-model="intervention.fixedProgram" label="Fixed program costs"
+							help="Total fixed costs at the above-facility level"> </numericinput>
+					</collapsible-section>
+					<collapsible-section title="Facility characteristics">
+
+						<numericinput v-model.number="intervention.initialStaffPerFacility" label="Initial staff per facility"
+							help="Average number of staff employed by each facility, even if they are not fully allocated to this intervention">
+						</numericinput>
+						<numericinput v-model.number="intervention.currentVisitsPerFacility"
+							label="Initial annual visits per facility"
+							help="Initial average annual number of intervention visits per facility"> </numericinput>
+						<div class="form-group mb-3">
+							<label>Specify capacity by:</label>
+							<select class="form-select" v-model="intervention.capacity">
+								<option value="visits">Max visits</option>
+								<option value="staff">Max staff</option>
+							</select>
+							<small class="text-muted">If max staff is provided, max visits will be calculated from the length of a
+								visit, the working
+								minutes available in a year, and the % FTE allocated to the intervention</small>
+						</div>
+						<numericinput v-if="intervention.capacity == 'visits'" v-model.number="intervention.maxVisitsPerFacility"
+							label="Max annual visits per facility">
+						</numericinput>
+						<numericinput v-if="intervention.capacity == 'staff'" v-model.number="intervention.maxStaffPerFacility"
+							label="Max staff per facility" help="Maximum number of staff employable per facility">
+						</numericinput>
+						<percentageinput label="% staff allocated to intervention" v-model.number="intervention.percFTEAllocated"
+							help="What percentage of staff time is allocated to this intervention">
+						</percentageinput>
+						<numericinput v-model.number="intervention.fixedFacility" label="Fixed facility costs"
+							help="Fixed cost per facility, e.g. buildings, utilities, maintenance"></numericinput>
+					</collapsible-section>
+					<collapsible-section title="Services">
+						<div class="row">
+							<div v-for="(service, index) in services" :key="index">
+								<service :service="service" :index="index" :intervention="intervention" @removed="removeService" />
+							</div>
+						</div>
+						<div class="row">
+							<div class="col">
+								<div style="display: flex; gap: 10px;">
+									<button @click="addService" class="btn btn-primary">Add another service</button>
+								</div>
+							</div>
+						</div>
+					</collapsible-section>
+				</div>
+				<!-- Main Content -->
+				<div class="col-md-9 p-4">
+					<h1>CAPTURE Scale</h1>
+
+					<div>
+						Enter your parameters on the left, or view one of our demo use cases:<br />
+						<button @click="() => setUseCase(0)" class="btn btn-primary">Scale up</button>
+						<button @click="() => setUseCase(1)" class="btn btn-primary mx-2">New service</button>
+						<button @click="() => setUseCase(2)" class="btn btn-primary">Integration</button>
+					</div>
+					<div class="row my-4">
+						<div class="col">
+							<ul class="nav nav-tabs">
+								<li class="nav-item">
+									<a class="nav-link" :class="tab == 'table' ? 'active' : ''" @click="viewTable" href="#">Table</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" :class="tab == 'graphs' ? 'active' : ''" @click="viewGraphs" href="#">Graphs</a>
+								</li>
+							</ul>
+							<div v-if="tab == 'table'">
+								<div class="my-3">
+									<h4>Cost function inputs</h5>
+										<table class="table">
+											<thead>
+												<tr>
+													<th>Max visits per facility per year</th>
+													<th v-if="!intervention.integrated" v-for="(service, index) in services" :key="index">Max
+														visits per
+														FTE per year <span v-text="services.length > 1 ? ' - ' + service.name: ''"></span></th>
+													<th v-if="intervention.integrated">Max visits per FTE per year</th>
+													<th v-for="(service, index) in services.filter(s => s.hasEquipment)" :key="index">Max visits
+														per equipment per year
+														<span v-text="services.length > 1 ? ' - ' + service.name: ''"></span>
+													</th>
+													<th>Fixed program cost</th>
+													<th>Fixed facility costs</th>
+													<th v-if="!intervention.integrated" v-for="(service, index) in services" :key="index">Cost
+														per FTE <span v-text="services.length > 1 ? ' - ' + service.name: ''"></span></th>
+													<th v-if="intervention.integrated">Cost per FTE</th>
+													<th v-for="(service, index) in services.filter(s => s.hasEquipment)" :key="index">
+														Cost per equipment <span v-text="services.length > 1 ? ' - ' + service.name: ''"></span>
+													</th>
+													<th v-for="(service, index) in services" :key="index">Variable cost per service
+														<span v-text="services.length > 1 ? ' - ' + service.name: ''"></span>
+													</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr v-for="(result, index) in results.slice(0, 1)" :key="index">
+													<td>
+														{{ formatNumber(result.maxVisitsPerFacility) }}
+													</td>
+													<td v-if="!intervention.integrated" v-for="(result, idx) in result.maxVisitsPerStaff"
+														:key="idx">
+														{{ formatNumber(result)}}</td>
+													<td v-if="intervention.integrated">
+														{{formatNumber(result.maxVisitsPerStaff) }}
+													</td>
+													<td v-for="(result, idx) in result.maxVisitsPerEquipment" :key="index">
+														{{formatNumber(result)}}
+													</td>
+													<td>{{formatNumber(result.fixedProgram)}}</td>
+													<td>{{formatNumber(result.fixedFacility)}}</td>
+													<td v-if="!intervention.integrated" v-for="(result, idx) in result.staffCosts" :key="idx">
+														{{formatNumber(result)}}</td>
+													<td v-if="intervention.integrated">{{ formatNumber(result.staffCosts) }}</td>
+													<td v-for="(result, idx) in result.equipmentCosts" :key="idx">
+														{{formatNumber(result)}}
+													</td>
+													<td v-for="(result, idx) in result.variableCosts" :key="idx">{{ result}}
+													</td>
+												</tr>
+											</tbody>
+										</table>
+								</div>
+								<h4>Costs by scale</h4>
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th v-if="intervention.integrated">Visits</th>
+											<th v-if="!intervention.integrated" v-for="(service, index) in services" :key="index">
+												Visits
+												<span v-text="services.length > 1 ? ' - ' + service.name: ''"></span>
+											</th>
+											<th>Number of facilities</th>
+											<th v-if="!intervention.integrated" v-for="(service, index) in services" :key="index">Number
+												of
+												staff
+												<span v-text="services.length > 1 ? ' - ' + service.name: ''"></span>
+											</th>
+											<th v-if="intervention.integrated">Number of staff</th>
+											<th v-for="(service, index) in services.filter(s => s.hasEquipment)">Number of equipment
+												<span v-text="services.length > 1 ? ' - ' + service.name: ''"></span>
+											</th>
+											<th>Total facility fixed costs</th>
+											<th>Total staff costs</th>
+											<th>Total variable cost</th>
+											<th>Total cost</th>
+											<th>Average cost</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr v-for="(result, index) in results" :key="index">
+											<td v-if="intervention.integrated">{{formatNumber(result.visits)}}</td>
+											<td v-if="!intervention.integrated" v-for="(service, index) in services" :key="index">
+												{{formatNumber((service.percentage/100) * result.visits)}}
+											</td>
+											<td>{{formatNumber(result.totalFacilities)}}</td>
+											<td v-if="!intervention.integrated" v-for="(result, index) in result.totalStaff" :key="index">
+												{{formatNumber(result)}}
+											</td>
+											<td v-if="intervention.integrated">{{result.totalStaff}}</td>
+											<td v-for="(result, index) in result.totalEquipment" :key="index">
+												{{formatNumber(result)}}
+											</td>
+											<td>{{formatNumber(result.totalFacilityCost)}}</td>
+											<td>{{formatNumber(result.totalStaffCost)}}</td>
+											<td>{{formatNumber(result.totalVariableCost)}}</td>
+											<td>{{formatNumber(result.totalCost)}}</td>
+											<td>{{formatNumber(result.averageCost)}}</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div v-if="tab == 'graphs'">
+								<div class="rounded-0 bg-light mt-3 form-group card">
+									<div class="card-body">
+										<label for="linearCost">Compare to a linear cost function with average cost:</label>
+										<div class="input-group mb-3" style="width: 200px">
+											<div class="input-group-prepend">
+												<span class="input-group-text"
+													style="border-top-right-radius: 0; border-bottom-right-radius: 0;">$</span>
+											</div>
+											<input v-model.number="intervention.linearAverageCost" name="linearCost" type="number"
+												class="form-control" step="0.01" />
+										</div>
+
+									</div>
+								</div>
+								<div id="averageCostChart" ref="averageCostChart" height="500" class="d-block"></div>
+								<div id="totalCostChart" ref="totalCostChart" height="500" class="d-block"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="src/ts/app.ts" type="module"></script>
+</body>
+
+</html>
