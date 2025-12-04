@@ -52,7 +52,7 @@
 				<small class="text-muted d-block">E.g. machines, devices</small>
 			</div>
 			<div class="row mb-3">
-				<label>Max services per unit of equipment</label>
+				<label>Max daily services per unit of equipment</label>
 				<input v-model.number="service.maxServicesPerEquipment" type="number" placeholder="Enter number"
 					class="form-control" />
 				<small class="text-muted">How many services could be performed in a day with a single unit</small>

@@ -83,6 +83,10 @@ export default defineComponent({
 			tab.value = 'graphs';
 		}
 
+		const integrated = computed<boolean>(() => {
+			return state.intervention.integrated || state.services.length == 1
+		});
+
 		const results = computed<ResultRow[]>(() => {
 			const res: ResultRow[] = [];
 			const initialVisits = (state.intervention.currentVisitsPerFacility * state.intervention.initialFacilities);
@@ -193,10 +197,11 @@ export default defineComponent({
 		watch(tab, (newVal) => {
 			if (newVal === 'graphs') renderCharts();
 		});
-saveTarget
+		saveTarget
 		return {
 			tab,
 			...state,
+			integrated,
 			showTargetModal,
 			toggleTargetModal,
 			saveTarget,
