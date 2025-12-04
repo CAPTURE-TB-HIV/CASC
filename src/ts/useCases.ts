@@ -1,6 +1,12 @@
+import {Intervention, Service} from "./intervention";
+
+export interface UseCase {
+	intervention: Intervention;
+	services: Service[];
+}
 
 const useCaseOne: UseCase = {
-	intervention: {
+	intervention:  Intervention.create({
 		fixedProgram: 28080,
 		fixedFacility: 537.56,
 		percFTEAllocated: 12.7,
@@ -10,14 +16,14 @@ const useCaseOne: UseCase = {
 		initialStaffPerFacility: 2,
 		currentVisitsPerFacility: 889,
 		maxVisitsPerFacility: 8010,
-		maxStaffPerFacility: 10,
+		maxStaffPerFacility: 9,
 		targetVisits: 19202400,
 		integrated: false,
 		initialVisits: null,
 		linearAverageCost: 2.88,
 		capacity: "staff"
-	},
-	services: [{
+	}),
+	services: [Service.create({
 		name: "Family Planning",
 		description: "The family planning intervention includes counselling and provision FP of methods (oral contraceptives, injectables, intra uterine devices, implants and condoms). FP methods are provided for one month (progestin only pills), three months (COC's and injectables), and 3- 5 years (IUDs and implants).",
 		costPerStaff: 723.08,
@@ -28,11 +34,11 @@ const useCaseOne: UseCase = {
 		costPerEquipment: 0,
 		training: 0,
 		maxServicesPerEquipment: 0
-	}]
+	})]
 }
 
 const useCaseTwo: UseCase = {
-	intervention: {
+	intervention: Intervention.create({
 		fixedProgram: 46800,
 		fixedFacility: 2005.07,
 		percFTEAllocated: 100,
@@ -48,8 +54,8 @@ const useCaseTwo: UseCase = {
 		integrated: false,
 		linearAverageCost: 2.88,
 		capacity: "visits"
-	},
-	services: [{
+	}),
+	services: [Service.create({
 		name: "WHO screening tool and sputum collection",
 		description: "",
 		costPerStaff: 5693.52,
@@ -60,8 +66,8 @@ const useCaseTwo: UseCase = {
 		costPerEquipment: 0,
 		training: 0,
 		maxServicesPerEquipment: 0
-	},
-	{
+	}),
+	Service.create({
 		name: "Xpert test",
 		percentage: 21,
 		description: "",
@@ -72,11 +78,11 @@ const useCaseTwo: UseCase = {
 		maxServicesPerEquipment: 20,
 		costPerEquipment: 2916.67,
 		training: 0
-	}]
+	})]
 }
 
 const useCaseThree: UseCase = {
-	intervention: {
+	intervention:  Intervention.create({
 		fixedProgram: 28080,
 		fixedFacility: 537.56,
 		percFTEAllocated: 12.7,
@@ -87,13 +93,13 @@ const useCaseThree: UseCase = {
 		currentVisitsPerFacility: 889,
 		initialVisits: 2059751,
 		maxVisitsPerFacility: 6866,
-		maxStaffPerFacility: 10,
+		maxStaffPerFacility: 9,
 		targetVisits: 20482560,
 		integrated: true,
 		linearAverageCost: 2.88,
 		capacity: "staff"
-	},
-	services: [{
+	}),
+	services: [Service.create({
 		name: "Family Planning Visit",
 		description: "The family planning intervention includes counselling and provision FP of methods (oral contraceptives, injectables, intra uterine devices, implants and condoms). FP methods are provided for one month (progestin only pills), three months (COC's and injectables), and 3- 5 years (IUDs and implants).",
 		costPerStaff: 723.08,
@@ -104,8 +110,8 @@ const useCaseThree: UseCase = {
 		costPerEquipment: 0,
 		training: 0,
 		maxServicesPerEquipment: 0
-	},
-	{
+	}),
+	Service.create({
 		name: "Screening Visit",
 		description: "The family planning intervention includes counselling and provision FP of methods (oral contraceptives, injectables, intra uterine devices, implants and condoms). FP methods are provided for one month (progestin only pills), three months (COC's and injectables), and 3- 5 years (IUDs and implants).",
 		costPerStaff: 723.08,
@@ -116,8 +122,7 @@ const useCaseThree: UseCase = {
 		costPerEquipment: 0,
 		training: 0,
 		maxServicesPerEquipment: 0
-	}]
+	})]
 }
 
-const useCases: UseCase[] = [useCaseOne, useCaseTwo, useCaseThree];
-export default useCases;
+export const useCases: UseCase[] = [useCaseOne, useCaseTwo, useCaseThree];

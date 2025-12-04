@@ -29,7 +29,9 @@
 	</div>
 </template>
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
+import {Intervention, Service} from "./intervention"
+
+import { computed, reactive } from 'vue';
 
 const state = reactive({
 	coverage: 0,

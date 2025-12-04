@@ -11,6 +11,7 @@ import NumberFacilities from './components/NumberFacilities.vue';
 import TotalFacilityFixedCosts from './components/TotalFacilityFixedCosts.vue';
 import TotalVariableCosts from './components/TotalVariableCosts.vue';
 import AverageCost from './components/AverageCost.vue';
+import CostFunctionInputs from './components/CostFunctionInputs.vue';
 
 const app = createApp(AppComponent);
 app.component("service", Service);
@@ -22,5 +23,6 @@ app.component("total-staff-costs", TotalStaffCosts);
 app.component("number-of-facilities", NumberFacilities);
 app.component("total-facilities-cost", TotalFacilityFixedCosts);
 app.component("total-variable-costs", TotalVariableCosts);
+app.component("cost-function-inputs", CostFunctionInputs);
 app.component("average-cost", AverageCost);
 app.mount('#app');

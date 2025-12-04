@@ -1,16 +1,17 @@
-import { defineComponent, reactive, ref, computed, watch, nextTick, useTemplateRef } from "vue"
+import { defineComponent, reactive, ref, computed, watch, nextTick } from "vue"
 // plotly provides no TS module definitions in this project; ignore the module error
 // @ts-ignore
 import Plotly from "plotly.js-dist-min";
-import useCases from "./useCases";
-import { costForScale, numberFormatter, intermediateScales, exponentialFit } from "./logic";
+import {Intervention, Service} from "./intervention"
+import {UseCase, useCases} from "./useCases";
+import { costForScale, numberFormatter, intermediateScales, costFunctionInputs } from "./logic";
 
 export default defineComponent({
 	setup() {
 		const tab = ref<'table' | 'graphs'>('table');
 		const showTargetModal = ref<boolean>(false);
 		const state = reactive<UseCase>({
-			intervention: {
+			intervention: Intervention.create({
 				fixedProgram: 0,
 				fixedFacility: 0,
 				percFTEAllocated: 0,
@@ -25,8 +26,8 @@ export default defineComponent({
 				targetVisits: 0,
 				integrated: false,
 				linearAverageCost: 0
-			},
-			services: [{
+			}),
+			services: [Service.create({
 				name: "Service One",
 				costPerStaff: 0,
 				minutesPerService: 0,
@@ -36,7 +37,7 @@ export default defineComponent({
 				costPerEquipment: 0,
 				training: 0,
 				maxServicesPerEquipment: 0
-			}]
+			})]
 		});
 
 		function setUseCase(index: number): void {
@@ -94,12 +95,15 @@ export default defineComponent({
 
 			//state.intervention.initialVisits 
 			let visits = initialVisits;
+			const inputs = costFunctionInputs(state.intervention, state.services);
+
 			res.push({
 				visits, ...costForScale(visits,
 					state.intervention.initialFacilities,
 					state.intervention.initialStaffPerFacility,
 					state.intervention,
-					state.services)
+					state.services,
+					inputs)
 			});
 
 			for (let i = 1; i < 19; i++) {
@@ -113,7 +117,8 @@ export default defineComponent({
 						state.intervention.initialFacilities,
 						state.intervention.initialStaffPerFacility,
 						state.intervention,
-						state.services)
+						state.services,
+						inputs)
 				});
 			}
 
@@ -123,7 +128,8 @@ export default defineComponent({
 					state.intervention.initialFacilities,
 					state.intervention.initialStaffPerFacility,
 					state.intervention,
-					state.services)
+					state.services,
+					inputs)
 			});
 
 			return res;

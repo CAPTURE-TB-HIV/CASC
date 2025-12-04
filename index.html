@@ -99,72 +99,8 @@
 								</li>
 							</ul>
 							<div v-if="tab == 'table'">
-								<div class="my-3">
-									<h4>Cost function inputs</h5>
-										<table class="table">
-											<thead>
-												<tr>
-													<th>Max visits per facility per year <br />(n_max<sub v-if="services.length > 1">0</sub>)</th>
-													<th v-if="!intervention.integrated" v-for="(service, index) in services" :key="index">Max
-														visits per
-														FTE per year<span v-text="services.length > 1 ? ' - ' + service.name: ''"></span>
-														<br />(n_max_s<sub v-if="services.length > 1">{{index}}</sub>)
-													</th>
-													<th v-if="intervention.integrated">Max visits per FTE per year <br /> (n_max_s)</th>
-													<template v-for="(service, index) in services">
-														<th v-if="service.hasEquipment">
-															Max visits
-															per equipment per year
-															<span v-text="services.length > 1 ? ' - ' + service.name: ''"></span> <br /> (n_max_e<sub
-																v-if="services.length > 1">{{index}}</sub>)
-														</th>
-													</template>
-													<th>Fixed program cost <br /> (FP)</th>
-													<th>Fixed facility costs <br /> (FF)</th>
-													<th v-if="!intervention.integrated" v-for="(service, index) in services" :key="index">Cost
-														per FTE <span v-text="services.length > 1 ? ' - ' + service.name: ''"></span><br />(ST<sub
-															v-if="services.length > 1">{{index}}</sub>)</th>
-													<th v-if="intervention.integrated">Cost per FTE <br /> (ST)</th>
-													<template v-for="(service, index) in services">
-														<th v-if="service.hasEquipment">
-															Cost per equipment <span v-text="services.length > 1 ? ' - ' + service.name: ''"></span>
-															<br /> (E<sub v-if="services.length > 1">{{index}}</sub>)
-														</th>
-													</template>
-													<th v-for="(service, index) in services" :key="index">Variable cost per service
-														<span v-text="services.length > 1 ? ' - ' + service.name: ''"></span><br /> (V<sub
-															v-if="services.length > 1">{{index}}</sub>)
-													</th>
-												</tr>
-											</thead>
-											<tbody>
-												<tr v-for="(result, index) in results.slice(0, 1)" :key="index">
-													<td>
-														{{ formatNumber(result.maxVisitsPerFacility) }}
-													</td>
-													<td v-if="!intervention.integrated" v-for="(result, idx) in result.maxVisitsPerStaff"
-														:key="idx">
-														{{ formatNumber(result)}}</td>
-													<td v-if="intervention.integrated">
-														{{formatNumber(result.maxVisitsPerStaff) }}
-													</td>
-													<td v-for="(result, idx) in result.maxVisitsPerEquipment" :key="index">
-														{{formatNumber(result)}}
-													</td>
-													<td>{{formatNumber(result.fixedProgram)}}</td>
-													<td>{{formatNumber(result.fixedFacility)}}</td>
-													<td v-if="!intervention.integrated" v-for="(result, idx) in result.staffCosts" :key="idx">
-														{{formatNumber(result)}}</td>
-													<td v-if="intervention.integrated">{{ formatNumber(result.staffCosts) }}</td>
-													<td v-for="(result, idx) in result.equipmentCosts" :key="idx">
-														{{formatNumber(result)}}
-													</td>
-													<td v-for="(result, idx) in result.variableCosts" :key="idx">{{ result}}
-													</td>
-												</tr>
-											</tbody>
-										</table>
-								</div>
+								<cost-function-inputs :intervention="intervention" :services="services"
+									:inputs="results[0]"></cost-function-inputs>
 								<div class="m-3 p-3 bg-warning-subtle fs-4">
 									C = FP + <span class="fs-2">&sum;</span> (n / n_max) FF + <span class="fs-2">&sum;</span>
 									(n<sub>i</sub> / n_max_s<sub>i</sub>) ST<sub>i</sub> + <span class="fs-2">&sum;</span>
@@ -196,11 +132,16 @@
 													<br /> (n<sub>{{index}}</sub> / n_max_e<sub>{{index}}</sub>)
 												</th>
 											</template>
-											<th><total-facilities-cost :services="services"
-													:intervention="intervention"></total-facilities-cost></th>
-											<th><total-staff-costs :services="services" :intervention="intervention"></total-staff-costs></th>
-											<th><total-variable-costs :services="services"
-													:intervention="intervention"></total-variable-costs></th>
+											<th>
+												<total-facilities-cost :services="services"
+													:intervention="intervention"></total-facilities-cost>
+											</th>
+											<th>
+												<total-staff-costs :services="services" :intervention="intervention"></total-staff-costs>
+											</th>
+											<th>
+												<total-variable-costs :services="services" :intervention="intervention"></total-variable-costs>
+											</th>
 											<th>Total cost<br /> &sum; (...)</th>
 											<th><average-cost :services="services" :intervention="intervention"></average-cost></th>
 										</tr>
@@ -216,9 +157,12 @@
 												{{formatNumber(result)}}
 											</td>
 											<td v-if="intervention.integrated">{{result.totalStaff}}</td>
-											<td v-for="(result, index) in result.totalEquipment" :key="index">
-												{{formatNumber(result)}}
-											</td>
+
+											<template v-for="(service, index) in services" :key="index">
+												<td v-if="service.hasEquipment">
+													{{formatNumber(result.totalEquipment[index])}}
+												</td>
+											</template>
 											<td>{{formatNumber(result.totalFacilityCost)}}</td>
 											<td>{{formatNumber(result.totalStaffCost)}}</td>
 											<td>{{formatNumber(result.totalVariableCost)}}</td>

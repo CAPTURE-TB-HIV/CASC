@@ -5,5 +5,7 @@
 	</span>
 </template>
 <script setup lang="ts">
-defineProps<{ services: any[], intervention: Intervention }>();
+import {Intervention, Service} from "../intervention"
+
+defineProps<{ services: Service[], intervention: Intervention }>();
 </script>

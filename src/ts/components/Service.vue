@@ -61,6 +61,8 @@
 	</div>
 </template>
 <script setup lang="ts">
+import {Intervention, Service} from "../intervention"
+
 const emit = defineEmits<{
 	(e: "removed", payload: number): void;
 }>();
