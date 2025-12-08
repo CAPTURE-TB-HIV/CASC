@@ -81,16 +81,14 @@
 	</div>
 </template>
 <script setup lang="ts">
-import { Intervention, Service } from "../intervention"
+import { IIntervention, IService } from "../intervention"
 
 import { numberFormatter } from '../logic';
-import MaxVisitsStaff from './MaxVisitsStaff.vue';
-import MaxVisitsFacility from './MaxVisitsFacility.vue';
 import InputName from './InputName.vue';
 
 function formatNumber(value: number): string {
 	return numberFormatter(value);
 }
 
-defineProps<{ intervention: Intervention, services: Service[], inputs: CostFunctionInputs }>();
+defineProps<{ intervention: IIntervention, services: IService[], inputs: CostFunctionInputs }>();
 </script>

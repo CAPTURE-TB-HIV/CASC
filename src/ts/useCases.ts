@@ -52,7 +52,7 @@ const useCaseTwo: UseCase = {
 		maxStaffPerFacility: 0,
 		targetVisits: 37497600,
 		integrated: false,
-		linearAverageCost: 2.88,
+		linearAverageCost: 10,
 		capacity: "visits"
 	}),
 	services: [Service.create({

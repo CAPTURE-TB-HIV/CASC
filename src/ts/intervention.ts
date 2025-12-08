@@ -1,5 +1,5 @@
 
-export class Service {
+export class Service implements IService {
 
 	proportion() {
 		return this.percentage / 100;
@@ -50,7 +50,7 @@ export class Service {
 
 }
 
-export class Intervention {
+export class Intervention implements IIntervention {
 
 	constructor(
 		public fixedProgram: number,
@@ -110,4 +110,35 @@ export class Intervention {
 			props.initialVisits,
 		);
 	}
+}
+
+export interface IService {
+	name: string;
+	costPerStaff: number;
+	minutesPerService: number;
+	variableCosts: number;
+	percentage: number;
+	hasEquipment: boolean;
+	maxServicesPerEquipment: number;
+	costPerEquipment: number;
+	training: number;
+	description?: string;
+}
+
+export interface IIntervention {
+	fixedProgram: number;
+	fixedFacility: number;
+	percFTEAllocated: number;
+	costPerStaff: number;
+	visitsPerYear: number;
+	initialFacilities: number;
+	initialStaffPerFacility: number;
+	currentVisitsPerFacility: number;
+	maxVisitsPerFacility: number;
+	maxStaffPerFacility: number;
+	targetVisits: number;
+	integrated: boolean;
+	linearAverageCost: number;
+	capacity: "visits" | "staff";
+	initialVisits?: number | null;
 }

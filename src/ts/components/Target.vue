@@ -9,14 +9,14 @@
 						<button type="button" class="btn-close" @click="onClose" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<numericinput v-model="state.population" label="Target population" help="Total targeted population">
-						</numericinput>
-						<percentageinput v-model="state.coverage" label="Target coverage"
+						<numeric-input v-model="state.population" label="Target population" help="Total targeted population">
+						</numeric-input>
+						<percentage-input v-model="state.coverage" label="Target coverage"
 							help="What percentage of the population will be reached">
-						</percentageinput>
-						<numericinput v-model="state.perCapitaTarget" label="Target annual visits per capita"
+						</percentage-input>
+						<numeric-input v-model="state.perCapitaTarget" label="Target annual visits per capita"
 							help="Target number of annual visits per person">
-						</numericinput>
+						</numeric-input>
 						<div class="fw-bold pt-3 text-center">Target total visits: <span>{{ target }}</span> </div>
 					</div>
 					<div class="modal-footer">
@@ -29,7 +29,9 @@
 	</div>
 </template>
 <script setup lang="ts">
-import {Intervention, Service} from "./intervention"
+import {IIntervention} from "../intervention"
+import NumericInput from "./NumericInput.vue";
+import PercentageInput from "./PercentageInput.vue";
 
 import { computed, reactive } from 'vue';
 
@@ -45,7 +47,7 @@ const emit = defineEmits<{
 }>();
 
 function onClick() {
-	emit("save", Math.ceil(state.coverage * state.population * state.perCapitaTarget))
+	emit("save", Math.ceil((state.coverage / 100) * state.population * state.perCapitaTarget))
 }
 
 function onClose() {
@@ -53,12 +55,12 @@ function onClose() {
 }
 
 const target = computed(() => {
-	return Math.ceil(state.coverage * state.population * state.perCapitaTarget)
+	return Math.ceil((state.coverage / 100) * state.population * state.perCapitaTarget)
 });
 
 const props = defineProps<{
 	show: boolean,
-	intervention: Intervention;
+	intervention: IIntervention;
 }>();
 
 </script>

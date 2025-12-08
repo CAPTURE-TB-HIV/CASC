@@ -4,6 +4,21 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
 	plugins: [vue()],
+	build: {
+		rollupOptions: {
+			output: {
+				manualChunks(id) {
+					if (id.includes('node_modules')) {
+						const parts = id.split('node_modules/')[1].split('/')
+						const pkgName = parts[0].startsWith('@')
+							? parts.slice(0, 2).join('/')
+							: parts[0]
+						return `vendor-${pkgName}` // e.g. vendor-plotly.js-dist-min
+					}
+				},
+			},
+		},
+	},
 	test: {
 		environment: 'happy-dom',
 		globals: true
@@ -32,4 +47,5 @@ export default defineConfig({
 			},
 		},
 	},
+	base: '/CASC/',
 })

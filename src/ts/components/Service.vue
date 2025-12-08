@@ -14,9 +14,9 @@
 		</div>
 
 		<div class="form-group mb-3" v-if="index > 0">
-			<percentageinput label="Percentage of visits" help="What percentage of visits include this service"
+			<percentage-input label="Percentage of visits" help="What percentage of visits include this service"
 				v-model="service.percentage">
-			</percentageinput>
+			</percentage-input>
 		</div>
 		<div class="form-group mb-3" v-if="index > 0">
 			<input class="form-check-input" type="checkbox" v-model="intervention.integrated" id="integration" />
@@ -61,7 +61,9 @@
 	</div>
 </template>
 <script setup lang="ts">
-import {Intervention, Service} from "../intervention"
+import {IIntervention, IService} from "../intervention"
+import PercentageInput from "./PercentageInput.vue";
+import NumericInput from "./NumericInput.vue";
 
 const emit = defineEmits<{
 	(e: "removed", payload: number): void;
@@ -72,8 +74,8 @@ function removeService() {
 }
 
 const props = defineProps<{
-	service: Service;
+	service: IService;
 	index: number;
-	intervention: Intervention;
+	intervention: IIntervention;
 }>();
 </script>

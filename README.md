@@ -1,7 +1,7 @@
-# CAPTURE-ESS
+# CASC
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 
-CAPTURE-ESS is an online tool for estimating possible economies of scale and scope in HIV and TB interventions, given capacity constraints.
+CASC (CApture SCale and SCope) is an online tool for estimating possible economies of scale and scope in HIV and TB interventions, given capacity constraints.
 
 ## Developing
 Requirements:

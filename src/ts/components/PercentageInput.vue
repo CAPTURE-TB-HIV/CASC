@@ -1,7 +1,7 @@
 <template>
 	<div class="form-group mb-2">
 		<label class="d-block">{{ label }}</label>
-		<input type="range" class="form-range" v-model="localModel" step="0.01" min="0.001" max="100">
+		<input type="range" class="form-range" v-model.number="localModel" step="0.01" min="0.001" max="100">
 		<div class="input-group">
 			<input v-model.number="localModel" type="number" placeholder="Enter number" class="form-control"
 				:step="integer ? '1' : 0.01" min="0" max="100" @input="onInput" />

@@ -2,7 +2,7 @@
 	<div class="form-group mb-2">
 		<label class="d-block" :for="name">{{ label }}</label>
 		<input v-model.number="localModel" :name="name" type="number" placeholder="Enter number" class="form-control"
-			:step="integer ? '1' : 0.001" :min="0" :max="max" @input="onInput"/>
+			:step="integer ? '1' : 0.001" :min="0" :max="max" />
 		<small class="form-text text-muted">{{ help }}</small>
 		<slot></slot>
 	</div>
@@ -31,22 +31,11 @@ const emit = defineEmits<{
 
 const localModel = computed({
 	get: () => props.modelValue,
-	set: (val: number) => emit("update:modelValue", val),
+	set: (val: any) => {
+		let value = !val ? 0 : Number(val);
+		if (props.min !== undefined && value < props.min) value = props.min
+    if (props.max !== undefined && value > props.max) value = props.max
+		emit("update:modelValue", value)
+	},
 });
-
-function onInput(event: Event) {
-  const target = event.target as HTMLInputElement
-  let value = target.value === '' ? NaN : Number(target.value)
-
-  // allow empty for now if you want:
-  if (Number.isNaN(value)) {
-    emit('update:modelValue', 0)
-    return
-  }
-
-  if (props.min !== undefined && value < props.min) value = props.min
-  if (props.max !== undefined && value > props.max) value = props.max
-
-  emit('update:modelValue', value)
-}
 </script>

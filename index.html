@@ -4,8 +4,9 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-	<title>CAPTURE Economies of Scale and Scope</title>
+	<link rel="icon" type="image/png" href="assets/capturesmall.png">
+
+	<title>CASC - Capture Scale and Scope</title>
 	<style>
 		[v-cloak] {
 			display: none;
@@ -14,186 +15,25 @@
 </head>
 
 <body>
-	<div id="app" v-cloak>
-		<div class="container-fluid">
-			<div class="row">
-				<!-- Sidebar -->
-				<div class="col-md-3 bg-light p-4" style="min-height: calc(100vh - 120px); border-right: 1px solid #ddd;">
-					<collapsible-section title="Program characteristics">
-
-						<numericinput v-model.number="intervention.initialFacilities" label="Initial number of facilities"
-							help="Facilities initially providing the intervention"></numericinput>
-						<numericinput v-model="intervention.targetVisits" label="Target annual visits">
-							<small class="text-muted">A total national target can be provided directly, or <a href="#"
-									style="margin-top: -2px" @click="toggleTargetModal">calculate target from population and
-									coverage</a></small>
-						</numericinput>
-						<target :show="showTargetModal" :intervention="intervention" @save="saveTarget" @close="toggleTargetModal">
-						</target>
-						<numericinput v-model="intervention.fixedProgram" label="Fixed program costs"
-							help="Total fixed costs at the above-facility level"> </numericinput>
-					</collapsible-section>
-					<collapsible-section title="Facility characteristics">
-
-						<numericinput v-model.number="intervention.initialStaffPerFacility" label="Initial staff per facility"
-							help="Average number of staff employed by each facility, even if they are not fully allocated to this intervention">
-						</numericinput>
-						<numericinput v-model.number="intervention.currentVisitsPerFacility"
-							label="Initial annual visits per facility"
-							help="Initial average annual number of intervention visits per facility"> </numericinput>
-						<div class="form-group mb-3">
-							<label>Specify capacity by:</label>
-							<select class="form-select" v-model="intervention.capacity">
-								<option value="visits">Max visits</option>
-								<option value="staff">Max staff</option>
-							</select>
-							<small class="text-muted">If max staff is provided, max visits will be calculated from the length of a
-								visit, the working
-								minutes available in a year, and the % FTE allocated to the intervention</small>
-						</div>
-						<numericinput v-if="intervention.capacity == 'visits'" v-model.number="intervention.maxVisitsPerFacility"
-							label="Max annual visits per facility">
-						</numericinput>
-						<numericinput v-if="intervention.capacity == 'staff'" v-model.number="intervention.maxStaffPerFacility"
-							label="Max staff per facility" help="Maximum number of staff employable per facility">
-						</numericinput>
-						<percentageinput label="% staff allocated to intervention" v-model.number="intervention.percFTEAllocated"
-							help="What percentage of staff time is allocated to this intervention">
-						</percentageinput>
-						<numericinput v-model.number="intervention.fixedFacility" label="Fixed facility costs"
-							help="Fixed cost per facility, e.g. buildings, utilities, maintenance"></numericinput>
-					</collapsible-section>
-					<collapsible-section title="Services">
-						<div class="row">
-							<div v-for="(service, index) in services" :key="index">
-								<service :service="service" :index="index" :intervention="intervention" @removed="removeService" />
-							</div>
-						</div>
-						<div class="row">
-							<div class="col">
-								<div style="display: flex; gap: 10px;">
-									<button @click="addService" class="btn btn-primary">Add another service</button>
-								</div>
-							</div>
-						</div>
-					</collapsible-section>
-				</div>
-				<!-- Main Content -->
-				<div class="col-md-9 p-4">
-					<h1>CAPTURE Economies of Scale and Scope</h1>
-
-					<div>
-						Enter your parameters on the left, or view one of our demo use cases:<br />
-						<button @click="() => setUseCase(0)" class="btn btn-primary">Scale up</button>
-						<button @click="() => setUseCase(1)" class="btn btn-primary mx-2">New service</button>
-						<button @click="() => setUseCase(2)" class="btn btn-primary">Integration</button>
-					</div>
-					<div class="row my-4">
-						<div class="col">
-							<ul class="nav nav-tabs">
-								<li class="nav-item">
-									<a class="nav-link" :class="tab == 'table' ? 'active' : ''" @click="viewTable" href="#">Table</a>
-								</li>
-								<li class="nav-item">
-									<a class="nav-link" :class="tab == 'graphs' ? 'active' : ''" @click="viewGraphs" href="#">Graphs</a>
-								</li>
-							</ul>
-							<div v-if="tab == 'table'">
-								<cost-function-inputs :intervention="intervention" :services="services"
-									:inputs="results[0]"></cost-function-inputs>
-								<div class="m-3 p-3 bg-warning-subtle fs-4">
-									C = FP + <span class="fs-2">&sum;</span> (n / n_max) FF + <span class="fs-2">&sum;</span>
-									(n<sub>i</sub> / n_max_s<sub>i</sub>) ST<sub>i</sub> + <span class="fs-2">&sum;</span>
-									(n<sub>i</sub> / n_max_e<sub>i</sub>) E<sub>i</sub> + <span class="fs-2">&sum;</span> (n<sub>i</sub>
-									V<sub>i</sub>)
-								</div>
-								<h4>Costs by scale</h4>
-								<table class="table table-striped">
-									<thead>
-										<tr>
-											<th v-if="integrated">Visits<br /> (n)</th>
-											<th v-if="!integrated" v-for="(service, index) in services" :key="index">
-												Visits
-												<span v-text="services.length > 1 ? ' - ' + service.name: ''"></span><br />
-												(n<sub>{{index}}</sub>)
-											</th>
-											<th><number-of-facilities :services="services"
-													:intervention="intervention"></number-of-facilities></th>
-											<th v-if="!integrated" v-for="(service, index) in services" :key="index">Number
-												of
-												staff
-												<span v-text="services.length > 1 ? ' - ' + service.name: ''"></span>
-												<br /> (n<sub>{{index}}</sub> / n_max_s<sub>{{index}}</sub>)
-											</th>
-											<th v-if="integrated">Number of staff<br /> (n / n_max_s)</th>
-											<template v-for="(service, index) in services">
-												<th v-if="service.hasEquipment">Number of equipment
-													<span v-text="services.length > 1 ? ' - ' + service.name: ''"></span>
-													<br /> (n<sub>{{index}}</sub> / n_max_e<sub>{{index}}</sub>)
-												</th>
-											</template>
-											<th>
-												<total-facilities-cost :services="services"
-													:intervention="intervention"></total-facilities-cost>
-											</th>
-											<th>
-												<total-staff-costs :services="services" :intervention="intervention"></total-staff-costs>
-											</th>
-											<th>
-												<total-variable-costs :services="services" :intervention="intervention"></total-variable-costs>
-											</th>
-											<th>Total cost<br /> &sum; (...)</th>
-											<th><average-cost :services="services" :intervention="intervention"></average-cost></th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr v-for="(result, index) in results" :key="index">
-											<td v-if="intervention.integrated">{{formatNumber(result.visits)}}</td>
-											<td v-if="!intervention.integrated" v-for="(service, index) in services" :key="index">
-												{{formatNumber((service.percentage/100) * result.visits)}}
-											</td>
-											<td>{{formatNumber(result.totalFacilities)}}</td>
-											<td v-if="!intervention.integrated" v-for="(result, index) in result.totalStaff" :key="index">
-												{{formatNumber(result)}}
-											</td>
-											<td v-if="intervention.integrated">{{result.totalStaff}}</td>
-
-											<template v-for="(service, index) in services" :key="index">
-												<td v-if="service.hasEquipment">
-													{{formatNumber(result.totalEquipment[index])}}
-												</td>
-											</template>
-											<td>{{formatNumber(result.totalFacilityCost)}}</td>
-											<td>{{formatNumber(result.totalStaffCost)}}</td>
-											<td>{{formatNumber(result.totalVariableCost)}}</td>
-											<td>{{formatNumber(result.totalCost)}}</td>
-											<td>{{formatNumber(result.averageCost)}}</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-							<div v-if="tab == 'graphs'">
-								<div class="rounded-0 bg-light mt-3 form-group card">
-									<div class="card-body">
-										<label for="linearCost">Compare to a linear cost function with average cost:</label>
-										<div class="input-group mb-3" style="width: 200px">
-											<div class="input-group-prepend">
-												<span class="input-group-text"
-													style="border-top-right-radius: 0; border-bottom-right-radius: 0;">$</span>
-											</div>
-											<input v-model.number="intervention.linearAverageCost" name="linearCost" type="number"
-												class="form-control" step="0.01" />
-										</div>
-
-									</div>
-								</div>
-								<div id="averageCostChart" ref="averageCostChart" height="500" class="d-block"></div>
-								<div id="totalCostChart" ref="totalCostChart" height="500" class="d-block"></div>
-							</div>
-						</div>
-					</div>
+	<div>
+		<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+			<div class="container-fluid">
+				<a class="navbar-brand me-2 text-primary" href="index.html">
+					<img src="src/assets/capturesmall.png" height="30px" />
+					CASC - Capture Scale and Scope
+			</a>
+				<div>
+					<a href="https://github.com/CAPTURE-TB-HIV/CASC" class="text-light">
+						<img alt="GitHub package.json version (branch)"
+							src="https://img.shields.io/github/package-json/v/CAPTURE-TB-HIV/CASC">
+					</a>
+					<a href="https://github.com/CAPTURE-TB-HIV/CASC" class="text-dark">
+						<img alt="GitHub logo" height="20" class="mx-1" src="src/assets/github-mark.svg" />
+					</a>
 				</div>
 			</div>
+		</nav>
+		<div class="container-fluid" id="app" v-cloak>
 		</div>
 	</div>
 	<script src="src/ts/app.ts" type="module"></script>

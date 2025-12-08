@@ -1,6 +1,6 @@
 {
   "name": "capture1",
-  "version": "0.0.0",
+  "version": "1.0.0-beta",
   "description": "",
   "main": "index.html",
   "type": "module",
@@ -15,15 +15,17 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.2",
     "@vitest/coverage-v8": "^4.0.1",
+    "@vue/test-utils": "^2.4.6",
     "bootstrap": "^5.3.8",
     "chartjs": "^0.3.24",
     "chartjs-plugin-annotation": "^3.1.0",
     "happy-dom": "^20.0.8",
+    "plotly.js-basic-dist-min": "^3.3.0",
     "plotly.js-dist-min": "^3.3.0",
     "sass-embedded": "^1.93.3",
     "typescript": "^5.9.3",
     "vite": "^7.1.12",
-    "vitest": "^4.0.1",
+    "vitest": "^4.0.15",
     "vue": "^3.5.25"
   }
 }
